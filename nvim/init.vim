@@ -19,38 +19,34 @@ Plug 'tpope/vim-commentary'
 
 Plug 'godlygeek/tabular'
 Plug 'ybian/smartim'            " im switcher only for macos
+Plug 'lervag/vimtex'
+Plug 'sirver/ultisnips'
+Plug 'honza/vim-snippets'
 call plug#end()
 
-set title
-set bg=light
-set go=a
-set mouse=a
-set nohlsearch
-set clipboard+=unnamedplus
-set noshowmode
-set noruler
-set laststatus=0
-set noshowcmd
-set spelllang=en_us,cjk
-set hidden
-
-set tabstop=2
-set shiftwidth=2
-set softtabstop=2
-set autoindent
-set list
-set listchars=tab:\|\ ,trail:■
-
-colorscheme nord
-let g:airline_theme = 'nord'
-
 " Some basics:
-	nnoremap c "_c
-	set nocompatible
-	filetype plugin on
+	set title
+	set hidden
 	syntax on
-	set encoding=utf-8
+	filetype plugin on
+	set bg=light
+	set mouse=a
 	set number relativenumber
+	set nohlsearch
+	set clipboard+=unnamedplus
+	set noshowmode
+	set noruler
+	set noshowcmd
+	set spelllang=en_us,cjk
+
+	set tabstop=2
+	set shiftwidth=2
+	set softtabstop=2
+	set autoindent
+
+	set list
+	set listchars=tab:\|\ ,trail:■
+
 " Enable autocompletion:
 	set wildmode=longest,list,full
 " Disables automatic commenting on newline:
@@ -84,23 +80,12 @@ let g:airline_theme = 'nord'
 " Replace ex mode with gq (format)
 	map Q gq
 
-" Check file in shellcheck:
-	map <leader>s :!clear && shellcheck -x %<CR>
-
-" Open my bibliography file in split
-	map <leader>b :vsp<space>$BIB<CR>
-	map <leader>r :vsp<space>$REFER<CR>
-
 " Replace all is aliased to S.
 	nnoremap S :%s//g<Left><Left>
 	nnoremap s <nop>
 
 " Compile document, be it groff/LaTeX/markdown/etc.
 	map <leader>c :w! \| !compiler "<c-r>%"<CR>
-
-" Open corresponding .pdf/.html or preview
-	map <leader>p :!opout <c-r>%<CR><CR>
-
 " Runs a script that cleans out tex build files whenever I close out of a .tex file.
 	autocmd VimLeave *.tex !texclear %
 
@@ -128,35 +113,11 @@ let g:airline_theme = 'nord'
 
 " When shortcut files are updated, renew bash and ranger configs with new material:
 	autocmd BufWritePost bm-files,bm-dirs !shortcuts
-" Run xrdb whenever Xdefaults or Xresources are updated.
-	autocmd BufRead,BufNewFile Xresources,Xdefaults,xresources,xdefaults set filetype=xdefaults
-	autocmd BufWritePost Xresources,Xdefaults,xresources,xdefaults !xrdb %
-" Recompile dwmblocks on config edit.
-	autocmd BufWritePost ~/.local/src/dwmblocks/config.h !cd ~/.local/src/dwmblocks/; sudo make install && { killall -q dwmblocks;setsid -f dwmblocks }
 
 " Turns off highlighting on the bits of code that are changed, so the line that is changed is highlighted but the actual text that has changed stands out on the line and is readable.
 if &diff
     highlight! link DiffText MatchParen
 endif
-
-" Function for toggling the bottom statusbar:
-let s:hidden_all = 0
-function! ToggleHiddenAll()
-    if s:hidden_all  == 0
-        let s:hidden_all = 1
-        set noshowmode
-        set noruler
-        set laststatus=0
-        set noshowcmd
-    else
-        let s:hidden_all = 0
-        set showmode
-        set ruler
-        set laststatus=2
-        set showcmd
-    endif
-endfunction
-nnoremap <leader>h :call ToggleHiddenAll()<CR>
 
 " buffers operation
 	" list buffers
@@ -176,28 +137,75 @@ nnoremap <leader>h :call ToggleHiddenAll()<CR>
 " tabular: ga, or :Tabularize <regex> to align
 vmap ga :Tabularize /
 
+" vimtex
+let g:tex_flavor = 'latex'
+let g:vimtex_quickfix_mode = 0
 
-"" ========== Only for Linux ==========
-"" automatically change input mode to en when exit insert mode
-"let g:input_toggle = 1
-"function! Fcitx2en()
-"   let s:input_status = system("fcitx5-remote")
-"   if s:input_status == 2
-"      let g:input_toggle = 1
-"      let l:a = system("fcitx5-remote -c")
-"   endif
-"endfunction
+" ultisnips
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 
-"function! Fcitx2zh()
-"   let s:input_status = system("fcitx5-remote")
-"   if s:input_status != 2 && g:input_toggle == 1
-"      let l:a = system("fcitx5-remote -o")
-"      let g:input_toggle = 0
-"   endif
-"endfunction
+" ========== Only for Linux ==========
+" automatically change input mode to en when exit insert mode
+let g:input_toggle = 1
+function! Fcitx2en()
+   let s:input_status = system("fcitx5-remote")
+   if s:input_status == 2
+      let g:input_toggle = 1
+      let l:a = system("fcitx5-remote -c")
+   endif
+endfunction
 
-"autocmd InsertLeave * call Fcitx2en()
-""autocmd InsertEnter * call Fcitx2zh()
+function! Fcitx2zh()
+   let s:input_status = system("fcitx5-remote")
+   if s:input_status != 2 && g:input_toggle == 1
+      let l:a = system("fcitx5-remote -o")
+      let g:input_toggle = 0
+   endif
+endfunction
+
+autocmd InsertLeave * call Fcitx2en()
+"autocmd InsertEnter * call Fcitx2zh()
+
+" Run xrdb whenever Xdefaults or Xresources are updated.
+	autocmd BufRead,BufNewFile Xresources,Xdefaults,xresources,xdefaults set filetype=xdefaults
+	autocmd BufWritePost Xresources,Xdefaults,xresources,xdefaults !xrdb %
+" Recompile dwmblocks on config edit.
+	autocmd BufWritePost ~/.local/src/dwmblocks/config.h !cd ~/.local/src/dwmblocks/; sudo make install && { killall -q dwmblocks;setsid -f dwmblocks }
+
+" Open corresponding .pdf/.html or preview
+	map <leader>p :!opout <c-r>%<CR><CR>
+
+let g:vimtex_view_general_viewer = 'zathura'
+let g:vimtex_view_method = 'zathura'
+let g:vimtex_compiler_progname = 'nvr'
+let g:vimtex_toc_config = {
+\ 'name' : 'TOC',
+\ 'layers' : ['content', 'todo', 'include'],
+\ 'split_width' : 25,
+\ 'todo_sorted' : 0,
+\ 'show_help' : 1,
+\ 'show_numbers' : 1,
+\}
+
+" neovim-remote
+function! SetServerName()
+  if has('win32')
+    let nvim_server_file = $TEMP . "/curnvimserver.txt"
+  else
+    let nvim_server_file = "/tmp/curnvimserver.txt"
+  endif
+  let cmd = printf("echo %s > %s", v:servername, nvim_server_file)
+  call system(cmd)
+endfunction
+
+augroup vimtex_common
+    autocmd!
+    autocmd FileType tex call SetServerName()
+augroup END
+
+
 
 
 " ========== Only for Macos ===============
