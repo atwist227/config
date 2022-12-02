@@ -16,14 +16,15 @@ Plug 'jreybert/vimagit'
 Plug 'vimwiki/vimwiki'
 Plug 'bling/vim-airline'
 Plug 'tpope/vim-commentary'
-
 Plug 'godlygeek/tabular'
-Plug 'ybian/smartim'            " im switcher only for macos
+" Plug 'ybian/smartim'            " im switcher only for macos
 Plug 'lervag/vimtex'
 Plug 'sirver/ultisnips'
 Plug 'honza/vim-snippets'
 call plug#end()
 
+colorscheme nord
+let g:airline_theme='nord'
 " Some basics:
 	set title
 	set hidden
@@ -150,23 +151,23 @@ let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
 " automatically change input mode to en when exit insert mode
 let g:input_toggle = 1
 function! Fcitx2en()
-   let s:input_status = system("fcitx5-remote")
+   let s:input_status = system("fcitx-remote")
    if s:input_status == 2
       let g:input_toggle = 1
-      let l:a = system("fcitx5-remote -c")
+      let l:a = system("fcitx-remote -c")
    endif
 endfunction
 
 function! Fcitx2zh()
-   let s:input_status = system("fcitx5-remote")
+   let s:input_status = system("fcitx-remote")
    if s:input_status != 2 && g:input_toggle == 1
-      let l:a = system("fcitx5-remote -o")
+      let l:a = system("fcitx-remote -o")
       let g:input_toggle = 0
    endif
 endfunction
 
 autocmd InsertLeave * call Fcitx2en()
-"autocmd InsertEnter * call Fcitx2zh()
+autocmd InsertEnter * call Fcitx2zh()
 
 " Run xrdb whenever Xdefaults or Xresources are updated.
 	autocmd BufRead,BufNewFile Xresources,Xdefaults,xresources,xdefaults set filetype=xdefaults
@@ -210,4 +211,4 @@ augroup END
 
 " ========== Only for Macos ===============
 " smartim: switch im
-let g:smartim_default = 'com.apple.keylayout.ABC'
+" let g:smartim_default = 'com.apple.keylayout.ABC'
